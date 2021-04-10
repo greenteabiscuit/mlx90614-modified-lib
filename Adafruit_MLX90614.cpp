@@ -17,19 +17,26 @@
  ****************************************************/
 
 #include "Adafruit_MLX90614.h"
+
+/** Wire object **/
+TwoWire *_wiring = NULL;
+
 /**
  * @brief Construct a new Adafruit_MLX90614::Adafruit_MLX90614 object
  *
  * @param i2caddr The I2C address to use. Defaults to 0x5A
  */
-Adafruit_MLX90614::Adafruit_MLX90614(uint8_t i2caddr) { _addr = i2caddr; }
+Adafruit_MLX90614::Adafruit_MLX90614(uint8_t i2caddr, TwoWire *theWire) {
+  _addr = i2caddr;
+  _wiring = theWire;
+}
 /**
  * @brief Begin the I2C connection
  *
  * @return bool  Always returns true
  */
 bool Adafruit_MLX90614::begin(void) {
-  Wire.begin();
+  _wiring->begin();
 
   /*
   for (uint8_t i=0; i<0x20; i++) {
@@ -128,15 +135,15 @@ float Adafruit_MLX90614::readTemp(uint8_t reg) {
 uint16_t Adafruit_MLX90614::read16(uint8_t a) {
   uint16_t ret;
 
-  Wire.beginTransmission(_addr); // start transmission to device
-  Wire.write(a);                 // sends register address to read from
-  Wire.endTransmission(false);   // end transmission
+  _wiring->beginTransmission(_addr); // start transmission to device
+  _wiring->write(a);                 // sends register address to read from
+  _wiring->endTransmission(false);   // end transmission
 
-  Wire.requestFrom(_addr, (size_t)3); // send data n-bytes read
-  ret = Wire.read();                  // receive DATA
-  ret |= Wire.read() << 8;            // receive DATA
+  _wiring->requestFrom(_addr, (size_t)3); // send data n-bytes read
+  ret = _wiring->read();                  // receive DATA
+  ret |= _wiring->read() << 8;            // receive DATA
 
-  uint8_t pec = Wire.read();
+  uint8_t pec = _wiring->read();
 
   return ret;
 }
@@ -169,10 +176,10 @@ void Adafruit_MLX90614::write16(uint8_t a, uint16_t v) {
   pecbuf[3] = v >> 8;
   pec = crc8(pecbuf, sizeof pecbuf);
 
-  Wire.beginTransmission(_addr); // start transmission to device
-  Wire.write(a);                 // sends register address to write
-  Wire.write(v & 0xff);          // lo
-  Wire.write(v >> 8);            // hi
-  Wire.write(pec);               // pec
-  Wire.endTransmission(true);    // end transmission
+  _wiring->beginTransmission(_addr); // start transmission to device
+  _wiring->write(a);                 // sends register address to write
+  _wiring->write(v & 0xff);          // lo
+  _wiring->write(v >> 8);            // hi
+  _wiring->write(pec);               // pec
+  _wiring->endTransmission(true);    // end transmission
 }
