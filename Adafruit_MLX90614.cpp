@@ -37,6 +37,7 @@ Adafruit_MLX90614::Adafruit_MLX90614(uint8_t i2caddr, TwoWire *theWire) {
  */
 bool Adafruit_MLX90614::begin(void) {
   _wiring->begin();
+  _wiring->setClock(100000);
 
   /*
   for (uint8_t i=0; i<0x20; i++) {
